@@ -99,20 +99,20 @@ services:
         - ./flink-pipeline/target:/opt/flink/usrlib
       networks:
           - main
-  jupyter:
-      build:
-          context: .
-          dockerfile: ./docker/Dockerfile.jupyter
-      container_name: jupyter
-      ports:
-          - '8888:8888'
-      volumes:
-          - ./jupyter/notebooks:/home/jovyan/work
-          - ./jupyter/connectors:/opt/flink/lib
-      environment:
-          - JUPYTER_TOKEN=easy
-      networks:
-          - main
+  # jupyter:
+  #     build:
+  #         context: .
+  #         dockerfile: ./docker/Dockerfile.jupyter
+  #     container_name: jupyter
+  #     ports:
+  #         - '8888:8888'
+  #     volumes:
+  #         - ./jupyter/notebooks:/home/jovyan/work
+  #         - ./jupyter/connectors:/opt/flink/lib
+  #     environment:
+  #         - JUPYTER_TOKEN=easy
+  #     networks:
+  #         - main
 
   fastapi:
       build:
@@ -141,6 +141,23 @@ services:
       - ./mkdocs.yml:/app/mkdocs.yml
     environment:
       - MKDOCS_WATCHDOG=1
+  
+  validated-orders:
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile.validated-order
+    container_name: validated-orders
+    env_file: .env
+    depends_on:
+      - kafka
+      - postgres
+      - debezium
+    volumes:
+      - ./validated-order-service:/app
+    command: ["python", "validated_order_service.py"]
+    restart: unless-stopped
+    networks:
+      - main
 
   # otel-collector:
   #   image: otel/opentelemetry-collector-contrib:0.79.0

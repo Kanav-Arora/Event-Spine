@@ -2,11 +2,14 @@ FROM python:3.10-slim
 
 WORKDIR /app
 
-RUN pip install mkdocs mkdocs-material mkdocs-git-revision-date-localized-plugin mkdocs-minify-plugin mkdocs-git-authors-plugin watchdog
-
-COPY mkdocs.yml .
-COPY docs/ ./docs/
+RUN pip install \
+    mkdocs \
+    mkdocs-material \
+    mkdocs-git-revision-date-localized-plugin \
+    mkdocs-minify-plugin \
+    mkdocs-git-authors-plugin \
+    watchdog
 
 EXPOSE 8001
 
-CMD ["mkdocs", "serve", "--dev-addr=0.0.0.0:8001", "--dirtyreload", "--watch", "/app"]
+CMD ["mkdocs", "serve", "--dev-addr=0.0.0.0:8001"]
