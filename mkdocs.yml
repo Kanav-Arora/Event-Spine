@@ -30,5 +30,5 @@ plugins:
 nav:
   - Overview: index.md
   - Architecture: architecture.md
-  - Services & Ports: services.md
+  - Development and Deployment: services.md
   - API Endpoints: api.md

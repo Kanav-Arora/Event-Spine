@@ -38,12 +38,11 @@ CREATE TABLE IF NOT EXISTS orders (
     order_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     cust_id UUID NOT NULL REFERENCES customers(cust_id),
     order_status TEXT NOT NULL CHECK (order_status IN (
-        'CREATED', 
-        'VALIDATED', 
-        'PAID', 
-        'PACKED',
-        'SHIPPED',
-        'DELIVERED',
+        'CREATED',
+        'PAYMENT_SUCCESSFULL',
+        'PAYMENT_FAILED',
+        'SHIPMENT_SUCCESSFULL',
+        'SHIPMENT_FAILED',
         'CANCELLED',
         'REJECTED'
     )),

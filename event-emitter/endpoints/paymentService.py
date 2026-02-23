@@ -1,20 +1,22 @@
-from models.RejectOrderModel import RejectOrderModel
-import uuid
+from models.PaymentModel import PaymentModel
 import json
+import uuid
 
-def rejectOrder(conn, request: RejectOrderModel):
+def processPayment(conn, request: PaymentModel):
     try:
         with conn:
             with conn.cursor() as cursor:
                 cursor.execute("""
-                    UPDATE orders SET order_status = 'REJECTED'
+                    UPDATE orders SET order_status = %s
                     where order_id = %s
-                    """, (request.order_id,)
+                    """, (request.status,request.order_id,)
                 )
                 event_metadata = json.dumps({
                             "source": request.source
                         })
                 
+                event_type = "success-payment" if request.status == "PAYMENT_SUCCESSFULL" else "failed-payment"
+
                 cursor.execute(
                     """
                     INSERT INTO events (
@@ -30,9 +32,9 @@ def rejectOrder(conn, request: RejectOrderModel):
                     """,
                     (
                         str(uuid.uuid4()),
-                        "orders",
-                        request.order_id,
-                        "reject-order",
+                        "payments",
+                        str(uuid.uuid4()),
+                        event_type,
                         json.dumps(request.payload.dict()),
                         event_metadata,
                         request.timestamp

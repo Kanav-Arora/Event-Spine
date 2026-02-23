@@ -6,13 +6,14 @@ class OrderItem(BaseModel):
     inventory_id: str
     quantity: int
 
-class RejectOrderPayload(BaseModel):
+class OrderPayload(BaseModel):
     order_id: str
     order_items: List[OrderItem]
 
-class RejectOrderModel(BaseModel):
+class PaymentModel(BaseModel):
     order_id: str
-    payload: RejectOrderPayload
+    payload: OrderPayload
     source: str
     timestamp: datetime
+    status: str
 

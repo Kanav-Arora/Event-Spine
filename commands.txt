@@ -9,3 +9,16 @@ curl http://localhost:8083/connectors
 
 - List Topics
 docker exec -it kafka kafka-topics --list --bootstrap-server localhost:9092
+
+- Create Topic
+
+orders.events
+docker exec -it kafka kafka-topics --bootstrap-server localhost:9092 --create --topic orders.events --partitions 3 --replication-factor 1
+
+validated.orders.events
+docker exec -it kafka kafka-topics --bootstrap-server localhost:9092 --create --topic validated.orders.events --partitions 3 --replication-factor 1
+
+
+./init-script.sh
+docker exec -it flink-jobmanager /bin/bash
+flink run /opt/flink/usrlib/flink-pipeline-1.0-SNAPSHOT.jar

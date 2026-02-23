@@ -142,19 +142,20 @@ services:
     environment:
       - MKDOCS_WATCHDOG=1
   
-  validated-orders:
+  fulfillment-services:
     build:
       context: .
-      dockerfile: ./docker/Dockerfile.validated-order
-    container_name: validated-orders
+      dockerfile: ./docker/Dockerfile.fulfillment-services
+    container_name: fulfillment-services
     env_file: .env
     depends_on:
       - kafka
       - postgres
       - debezium
+      - fastapi
     volumes:
-      - ./validated-order-service:/app
-    command: ["python", "validated_order_service.py"]
+      - ./fulfillment-services:/app
+    command: ["python", "fulfillment-services.py"]
     restart: unless-stopped
     networks:
       - main
