@@ -43,7 +43,14 @@ docker exec kafka kafka-topics \
 docker exec kafka kafka-topics \
   --bootstrap-server localhost:9092 \
   --create \
-  --topic payments.events \
+  --topic request.payments \
+  --partitions 3 \
+  --replication-factor 1 || true
+
+docker exec kafka kafka-topics \
+  --bootstrap-server localhost:9092 \
+  --create \
+  --topic request.shipments \
   --partitions 3 \
   --replication-factor 1 || true
 

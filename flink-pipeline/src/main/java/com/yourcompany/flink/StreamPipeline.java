@@ -10,6 +10,7 @@ import com.yourcompany.flink.models.InventoryEvent;
 import com.yourcompany.flink.models.OrderBucketEvent;
 import com.yourcompany.flink.models.OrderItemEvent;
 import com.yourcompany.flink.models.ValidatedEvent;
+import com.yourcompany.flink.sink.PaymentSink;
 import com.yourcompany.flink.sink.RejectedOrdersSink;
 import com.yourcompany.flink.source.InventorySource;
 import com.yourcompany.flink.source.OrderSource;
@@ -40,6 +41,10 @@ public class StreamPipeline {
                 bucketedOrders.filter(event -> OrderValidationStatus.REJECTED == event.getStatus())
                                 .map(event -> JsonMapper.toJson(event))
                                 .sinkTo(RejectedOrdersSink.create());
+
+                bucketedOrders.filter(event -> OrderValidationStatus.ACCEPTED == event.getStatus())
+                                .map(event -> JsonMapper.toJson(event))
+                                .sinkTo(PaymentSink.create());
 
                 env.execute("Flink Streaming Pipeline");
         }

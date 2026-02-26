@@ -2,6 +2,8 @@ from confluent_kafka import Consumer, KafkaError
 from config import KAFKA_BOOTSTRAP_SERVERS
 from orderRejectionService import orderRejectionService
 from paymentService import paymentService
+from shipmentService import shipmentService
+from producer import initiate_producer
 import threading
 
 def create_consumer(topic):
@@ -17,6 +19,7 @@ def create_consumer(topic):
     return consumer
 
 def consume(consumer, caller):
+    producer = initiate_producer()
     try:
         while True:
             msg = consumer.poll(timeout = 1.0)
@@ -25,9 +28,10 @@ def consume(consumer, caller):
             if msg.error():
                 if msg.error().code() == KafkaError._PARTITION_EOF:
                     continue
-            response = caller(msg)
-            if response:
+            response = caller(msg,producer)
+            if response["status"]:
                 consumer.commit(message = msg)
+
     finally:
         consumer.close()
 
@@ -36,8 +40,12 @@ def start_order_service():
     consume(consumer,orderRejectionService)
 
 def start_payment_service():
-    consumer = create_consumer("requests.payments")
+    consumer = create_consumer("request.payments")
     consume(consumer,paymentService)
+
+# def start_shipment_service():
+#     consumer = create_consumer("request.shipments")
+#     consume(consumer,shipmentService)
 
 if __name__ == "__main__":
     threading.Thread(target=start_order_service).start()

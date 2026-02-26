@@ -2,11 +2,12 @@ import requests
 from config import API_URL
 import json
 from datetime import datetime
+from producer import delivery_report
 
 def paymentStatus(order_id: str) -> bool:
     return order_id[-1].isnumeric()
 
-def paymentService(msg):
+def paymentService(msg,producer):
     try:
         event = json.loads(msg.value().decode("utf-8"))
         order_id = event["order_id"]
@@ -26,17 +27,19 @@ def paymentService(msg):
             "source": source,
             "timestamp": timestamp
         }
-        print(data)
         response = requests.post(
             API_URL + "/payment-service",
             json=data,
             timeout=5
         )
         response.raise_for_status()
-        return True
+        if payment_success:
+            producer.produce("request.shipments",value=json.dumps(data).encode("utf-8"), on_delivery=delivery_report)
+            producer.flush()
+        return {"status": True, "response": response, "payment_status" : payment_success}
 
     except Exception as e:
         print(
                     f"Payment Service; Processing failed for offset {msg.offset()}: {e}"
                 )
-        return False
+        return {"status":False}

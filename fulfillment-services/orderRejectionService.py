@@ -2,7 +2,7 @@ import requests
 from config import API_URL
 import json
 
-def orderRejectionService(msg):
+def orderRejectionService(msg,producer):
     try:
         event = json.loads(msg.value().decode("utf-8"))
         order_id = event["order_id"]
@@ -27,10 +27,10 @@ def orderRejectionService(msg):
             timeout=5
         )
         response.raise_for_status()
-        return True
+        return {"status": True, "response": response, "rejection_source" : rejection_source}
 
     except Exception as e:
         print(
                     f"Processing failed for offset {msg.offset()}: {e}"
                 )
-        return False
+        return {"status": False}

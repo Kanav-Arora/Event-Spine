@@ -3,13 +3,17 @@ package com.yourcompany.flink.models;
 import com.yourcompany.flink.statics.OrderValidationStatus;
 import java.time.Instant;
 import java.util.Map;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class OrderBucketEvent {
     private String source;
     private String eventType;
     private String aggregateType;
+    @JsonProperty("order_id")
     private String order_id;
+    @JsonProperty("total_items")
     private int total_items;
+    @JsonProperty("order_items")
     private Map<String, Integer> order_items;
     private OrderValidationStatus status;
     private String timestamp;
