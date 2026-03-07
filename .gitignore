@@ -8,3 +8,5 @@ temp.ipynb
 *.ipynb_checkpoints
 .idea
 .vscode
+event-consumer.ipynb
+event-producer.ipynb

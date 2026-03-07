@@ -43,10 +43,11 @@ def start_payment_service():
     consumer = create_consumer("request.payments")
     consume(consumer,paymentService)
 
-# def start_shipment_service():
-#     consumer = create_consumer("request.shipments")
-#     consume(consumer,shipmentService)
+def start_shipment_service():
+    consumer = create_consumer("request.shipments")
+    consume(consumer,shipmentService)
 
 if __name__ == "__main__":
     threading.Thread(target=start_order_service).start()
     threading.Thread(target=start_payment_service).start()
+    threading.Thread(target=start_shipment_service).start()
