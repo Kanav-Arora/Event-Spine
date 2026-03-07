@@ -1,8 +1,8 @@
-from models.PaymentModel import PaymentModel
+from models.ShipmentModel import ShipmentModel
 import json
 import uuid
 
-def processPayment(conn, request: PaymentModel):
+def processShipment(conn, request: ShipmentModel):
     try:
         with conn:
             with conn.cursor() as cursor:
@@ -15,7 +15,7 @@ def processPayment(conn, request: PaymentModel):
                             "source": request.source
                         })
                 
-                event_type = "success-payment" if request.status == "PAYMENT_SUCCESSFULL" else "failed-payment"
+                event_type = "success-shipment" if request.status == "SHIPMENT_SUCCESSFULL" else "failed-shipment"
 
                 cursor.execute(
                     """
@@ -32,7 +32,7 @@ def processPayment(conn, request: PaymentModel):
                     """,
                     (
                         str(uuid.uuid4()),
-                        "payments",
+                        "shipments",
                         str(uuid.uuid4()),
                         event_type,
                         json.dumps(request.payload.dict()),
@@ -46,5 +46,5 @@ def processPayment(conn, request: PaymentModel):
         
     except Exception as e:
         conn.rollback()
-        print(f"Error Payment Endpoint: {e}")
+        print(f"Error Shipment Endpoint: {e}")
         return {"status":400, "message": e}

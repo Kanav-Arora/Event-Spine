@@ -3,8 +3,10 @@ from db import initiateDB
 from endpoints.createOrder import createOrder
 from endpoints.rejectOrder import rejectOrder
 from endpoints.paymentService import processPayment
+from endpoints.shipmentService import processShipment
 from models.RejectOrderModel import RejectOrderModel
 from models.PaymentModel import PaymentModel
+from models.ShipmentModel import ShipmentModel
 
 app = FastAPI()
 
@@ -21,3 +23,7 @@ def rejectOrderCaller(request: RejectOrderModel):
 @app.post("/payment-service")
 def paymentServiceCaller(request: PaymentModel):
     return processPayment(conn,request)
+
+@app.post("/shipment-service")
+def shipmentServiceCaller(request: ShipmentModel):
+    return processShipment(conn,request)
