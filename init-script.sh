@@ -54,4 +54,11 @@ docker exec kafka kafka-topics \
   --partitions 3 \
   --replication-factor 1 || true
 
+docker exec kafka kafka-topics \
+  --bootstrap-server localhost:9092 \
+  --create \
+  --topic completed.orders \
+  --partitions 3 \
+  --replication-factor 1 || true
+
 echo "🎉 Kafka topics ready"

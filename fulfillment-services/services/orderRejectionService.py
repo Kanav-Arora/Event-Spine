@@ -10,24 +10,23 @@ def orderRejectionService(msg,producer):
         for i,v in event["order_items"].items():
             order_items.append({"inventory_id": i,"quantity": v})
         timestamp = event["timestamp"]
-        rejection_source = "orders"
         payload = {}
         payload["order_id"] = order_id
         payload["order_items"] = order_items
         data = {
             "order_id": order_id,
             "payload": payload,
-            "rejection_source": rejection_source,
+            "status": "ORDER_REJECTED",
+            "source": "orders",
             "timestamp": timestamp
         }
-        print(data)
         response = requests.post(
             API_URL + "/reject-order",
             json=data,
             timeout=5
         )
         response.raise_for_status()
-        return {"status": True, "response": response, "rejection_source" : rejection_source}
+        return {"status": True, "response": response, "source": data["source"], "status" : data["status"]}
 
     except Exception as e:
         print(

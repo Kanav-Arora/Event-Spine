@@ -2,12 +2,12 @@ from models.ResponseModel import ResponseModel
 import uuid
 import json
 
-def rejectOrder(conn, request: ResponseModel):
+def completeOrder(conn, request: ResponseModel):
     try:
         with conn:
             with conn.cursor() as cursor:
                 cursor.execute("""
-                    UPDATE orders SET order_status = 'REJECTED'
+                    UPDATE orders SET order_status = 'COMPLETED'
                     where order_id = %s
                     """, (request.order_id,)
                 )
@@ -32,7 +32,7 @@ def rejectOrder(conn, request: ResponseModel):
                         str(uuid.uuid4()),
                         "orders",
                         request.order_id,
-                        "reject-order",
+                        "completed-order",
                         json.dumps(request.payload.dict()),
                         event_metadata,
                         request.timestamp
@@ -44,5 +44,5 @@ def rejectOrder(conn, request: ResponseModel):
         
     except Exception as e:
         conn.rollback()
-        print(f"Error rejecting order: {e}")
+        print(f"Error completing order: {e}")
         return {"status":400, "message": e}

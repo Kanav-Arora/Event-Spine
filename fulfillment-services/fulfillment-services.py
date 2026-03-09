@@ -1,8 +1,9 @@
 from confluent_kafka import Consumer, KafkaError
 from config import KAFKA_BOOTSTRAP_SERVERS
-from orderRejectionService import orderRejectionService
-from paymentService import paymentService
-from shipmentService import shipmentService
+from services.orderRejectionService import orderRejectionService
+from services.paymentService import paymentService
+from services.shipmentService import shipmentService
+from services.orderCompletionService import orderCompletionService
 from producer import initiate_producer
 import threading
 
@@ -35,7 +36,7 @@ def consume(consumer, caller):
     finally:
         consumer.close()
 
-def start_order_service():
+def start_rejected_order_service():
     consumer = create_consumer("rejected.orders")
     consume(consumer,orderRejectionService)
 
@@ -47,7 +48,12 @@ def start_shipment_service():
     consumer = create_consumer("request.shipments")
     consume(consumer,shipmentService)
 
+def start_completed_order_service():
+    consumer = create_consumer("completed.orders")
+    consume(consumer,orderCompletionService)
+
 if __name__ == "__main__":
-    threading.Thread(target=start_order_service).start()
+    threading.Thread(target=start_rejected_order_service).start()
     threading.Thread(target=start_payment_service).start()
     threading.Thread(target=start_shipment_service).start()
+    threading.Thread(target=start_completed_order_service).start()
