@@ -15,7 +15,7 @@ def paymentService(msg,producer):
         for i,v in event["order_items"].items():
             order_items.append({"inventory_id": i,"quantity": v})
         timestamp = str(datetime.now())
-        source = "payment"
+        source = "payments"
         payload = {}
         payload["order_id"] = order_id
         payload["order_items"] = order_items
@@ -36,7 +36,7 @@ def paymentService(msg,producer):
         if payment_success:
             producer.produce("request.shipments",value=json.dumps(data).encode("utf-8"), on_delivery=delivery_report)
             producer.flush()
-        return {"status": True, "response": response, "payment_status" : payment_success}
+        return {"status": True, "response": response, "source": data["source"], "status" : data["status"]}
 
     except Exception as e:
         print(

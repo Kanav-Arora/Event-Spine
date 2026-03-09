@@ -1,8 +1,8 @@
-from models.PaymentModel import PaymentModel
+from models.ResponseModel import ResponseModel
 import json
 import uuid
 
-def processPayment(conn, request: PaymentModel):
+def processPayment(conn, request: ResponseModel):
     try:
         with conn:
             with conn.cursor() as cursor:

@@ -1,8 +1,8 @@
-from models.ShipmentModel import ShipmentModel
+from models.ResponseModel import ResponseModel
 import json
 import uuid
 
-def processShipment(conn, request: ShipmentModel):
+def processShipment(conn, request: ResponseModel):
     try:
         with conn:
             with conn.cursor() as cursor:
