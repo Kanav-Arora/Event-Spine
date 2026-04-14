@@ -86,6 +86,8 @@ public class OrderItemEvent implements Serializable {
     public String toString() {
         return "OrderItemEvent{" +
                 "source='" + source + '\'' +
+                "aggregateType='" + aggregateType + '\'' +
+                "eventType='" + eventType + '\'' +
                 ", orderId='" + order_id + '\'' +
                 ", inventoryId='" + inventory_id + '\'' +
                 ", quantity=" + quantity +

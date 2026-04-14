@@ -11,6 +11,7 @@ import com.yourcompany.flink.statics.OrderValidationStatus;
 import org.apache.flink.api.common.state.ValueState;
 import org.apache.flink.api.common.state.ValueStateDescriptor;
 import org.apache.flink.configuration.Configuration;
+import com.yourcompany.flink.statics.EventStatus;
 
 public class InventoryOrderValidationState
         extends KeyedCoProcessFunction<String, InventoryEvent, OrderItemEvent, ValidatedEvent> {
@@ -36,7 +37,7 @@ public class InventoryOrderValidationState
         Integer available_qty = inventoryState.value();
         int quantity = event.getQuantity();
         OrderValidationStatus status;
-        if ("create-order".equals(event.getEventType())) {
+        if (EventStatus.CREATE_ORDER.getValue().equals(event.getEventType())) {
             if (available_qty == null) {
                 status = OrderValidationStatus.INVALID;
             } else if (available_qty.intValue() >= quantity) {
@@ -44,9 +45,17 @@ public class InventoryOrderValidationState
                 inventoryState.update(available_qty.intValue() - quantity);
             } else
                 status = OrderValidationStatus.REJECTED;
-
-            out.collect(ValidatedEvent.order(event, status));
+        } else if (EventStatus.FAILED_PAYMENT.getValue().equals(event.getEventType()) |
+                EventStatus.FAILED_SHIPMENT.getValue().equals(event.getEventType())) {
+            if (available_qty == null) {
+                status = OrderValidationStatus.INVALID;
+            } else {
+                status = OrderValidationStatus.RELEASED;
+                inventoryState.update(available_qty.intValue() + quantity);
+            }
+        } else {
+            status = OrderValidationStatus.INVALID;
         }
-
+        out.collect(ValidatedEvent.order(event, status));
     }
 }

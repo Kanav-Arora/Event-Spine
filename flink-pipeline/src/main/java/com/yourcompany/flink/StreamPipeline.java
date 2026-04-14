@@ -14,6 +14,8 @@ import com.yourcompany.flink.sink.PaymentSink;
 import com.yourcompany.flink.sink.RejectedOrdersSink;
 import com.yourcompany.flink.source.InventorySource;
 import com.yourcompany.flink.source.OrderSource;
+import com.yourcompany.flink.source.PaymentSource;
+import com.yourcompany.flink.source.ShipmentSource;
 import com.yourcompany.flink.statics.OrderValidationStatus;
 import com.yourcompany.flink.task.BucketOrders;
 import com.yourcompany.flink.task.ValidateStream;
@@ -33,9 +35,18 @@ public class StreamPipeline {
                                 .fromSource(OrderSource.create(), WatermarkStrategy.noWatermarks(), "Order Source")
                                 .flatMap(new OrderItemMapper())
                                 .name("Order Item Event Mapper");
-
+                DataStream<OrderItemEvent> paymentStream = env
+                                .fromSource(PaymentSource.create(), WatermarkStrategy.noWatermarks(), "Payment Source")
+                                .flatMap(new OrderItemMapper())
+                                .name("Payment Item Event Mapper");
+                DataStream<OrderItemEvent> shipmentStream = env
+                                .fromSource(ShipmentSource.create(), WatermarkStrategy.noWatermarks(),
+                                                "Shipment Source")
+                                .flatMap(new OrderItemMapper())
+                                .name("Shipment Item Event Mapper");
+                DataStream<OrderItemEvent> unifiedStream = orderItemStream.union(paymentStream).union(shipmentStream);
                 DataStream<ValidatedEvent> validatedStream = ValidateStream.validateStream(inventoryStream,
-                                orderItemStream);
+                                unifiedStream);
                 DataStream<OrderBucketEvent> bucketedOrders = BucketOrders.bucketOrder(validatedStream);
 
                 bucketedOrders.filter(event -> OrderValidationStatus.REJECTED == event.getStatus())

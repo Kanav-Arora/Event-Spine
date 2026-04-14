@@ -25,7 +25,7 @@ public class OrderItemMapper implements FlatMapFunction<OrderDeserializedEvent, 
         for (JsonNode item : orderItems) {
 
             OrderItemEvent event = new OrderItemEvent(
-                    "Order",
+                    deserialized_event.getAggregateType(),
                     deserialized_event.getEventType(),
                     deserialized_event.getAggregateType(),
                     orderId,

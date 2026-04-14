@@ -6,4 +6,5 @@ public enum OrderValidationStatus {
     INVALID,
     SNAPSHOT_COMPLETED,
     STATE_UPDATED,
+    RELEASED
 }
