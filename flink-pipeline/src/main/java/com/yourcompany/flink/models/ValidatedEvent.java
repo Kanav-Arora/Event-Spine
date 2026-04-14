@@ -43,6 +43,15 @@ public class ValidatedEvent implements Serializable {
         return r;
     }
 
+    @Override
+    public String toString() {
+        return String.format(
+                "{\"source\":\"%s\",\"eventType\":\"%s\",\"aggregateType\":\"%s\",\"order_id\":\"%s\",\"inventory_id\":\"%s\",\"quantity\":%d,\"total_items\":%d,\"updated_at\":\"%s\",\"snapshot\":\"%s\",\"status\":\"%s\"}",
+                source, eventType, aggregateType, order_id, inventory_id,
+                quantity, total_items, updated_at, snapshot,
+                status != null ? status.name() : null);
+    }
+
     public String getSource() {
         return source;
     }
