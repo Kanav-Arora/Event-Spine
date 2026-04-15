@@ -99,21 +99,6 @@ services:
         - ./flink-pipeline/target:/opt/flink/usrlib
       networks:
           - main
-  # jupyter:
-  #     build:
-  #         context: .
-  #         dockerfile: ./docker/Dockerfile.jupyter
-  #     container_name: jupyter
-  #     ports:
-  #         - '8888:8888'
-  #     volumes:
-  #         - ./jupyter/notebooks:/home/jovyan/work
-  #         - ./jupyter/connectors:/opt/flink/lib
-  #     environment:
-  #         - JUPYTER_TOKEN=easy
-  #     networks:
-  #         - main
-
   fastapi:
       build:
           context: .
@@ -184,16 +169,37 @@ services:
   #   networks:
   #     - observability
 
-  # loki:
-  #   image: grafana/loki:2.9.1
-  #   container_name: loki
-  #   volumes:
-  #     - ./observability/loki/loki-config.yaml:/etc/loki/local-config.yaml:ro
-  #     - ./observability/loki:/loki
-  #   ports:
-  #     - "3100:3100"
-  #   networks:
-  #     - observability
+  loki:
+    image: grafana/loki:3.0.0
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./observability/loki-config.yml:/etc/loki/local-config.yaml
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - main
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    command: ["--config=/etc/otel/config.yaml"]
+    volumes:
+      - ./observability/otel-collector-config.yml:/etc/otel/config.yaml
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+    networks:
+      - main
+
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+    - grafana-storage:/var/lib/grafana
+    networks:
+      - main
 
   # tempo:
   #   image: grafana/tempo:1.5.0
@@ -227,6 +233,9 @@ services:
   #   networks:
   #     - observability
     
+volumes:
+  grafana-storage: 
+
 networks:
   main:
     driver: bridge

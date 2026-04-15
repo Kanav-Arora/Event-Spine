@@ -1,6 +1,7 @@
 from models.ResponseModel import ResponseModel
 import uuid
 import json
+from logger.logger import log_event
 
 def rejectOrder(conn, request: ResponseModel):
     try:
@@ -14,7 +15,8 @@ def rejectOrder(conn, request: ResponseModel):
                 event_metadata = json.dumps({
                             "source": request.source
                         })
-                
+                event_id = str(uuid.uuid4())
+                event_payload = request.payload.dict()
                 cursor.execute(
                     """
                     INSERT INTO events (
@@ -29,20 +31,21 @@ def rejectOrder(conn, request: ResponseModel):
                     VALUES (%s, %s, %s, %s, %s, %s,%s)
                     """,
                     (
-                        str(uuid.uuid4()),
+                        event_id,
                         "orders",
                         request.order_id,
                         "reject-order",
-                        json.dumps(request.payload.dict()),
+                        json.dumps(event_payload),
                         event_metadata,
                         request.timestamp
                     )
                 )
 
                 conn.commit()
+                log_event(200,"reject-order",event_id,event_payload["order_id"],event_payload)
                 return {"status":200, "message": "Success", "payload": request.payload}
         
     except Exception as e:
         conn.rollback()
-        print(f"Error rejecting order: {e}")
+        log_event(400,"reject-order",level="error",metadata={"message": e},order_id=request.order_id)
         return {"status":400, "message": e}

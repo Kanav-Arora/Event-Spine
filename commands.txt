@@ -22,3 +22,4 @@ docker exec -it kafka kafka-topics --bootstrap-server localhost:9092 --create --
 ./init-script.sh
 docker exec -it flink-jobmanager /bin/bash
 flink run /opt/flink/usrlib/flink-pipeline-1.0-SNAPSHOT.jar
+
