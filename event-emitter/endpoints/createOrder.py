@@ -1,6 +1,7 @@
 import random
 import json
 from decimal import Decimal
+from logger.logger import log_event
 
 def createOrder(conn):
     try:
@@ -66,9 +67,10 @@ def createOrder(conn):
                             )
                 event_id = cursor.fetchone()[0]
                 event_payload["event_id"] = event_id
+                log_event(200,"create-order",event_payload["event_id"],event_payload["order_id"],event_payload)
                 return {"status": 200, "message" : "Success", "payload": event_payload }
     
     except Exception as e:
         conn.rollback()
-        print(f"Error creating order: {e}")
+        log_event(400,"create-order",level="error",metadata={"message" : e})
         return {"status": 400, "message" : e }
