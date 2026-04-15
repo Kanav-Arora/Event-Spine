@@ -30,7 +30,6 @@ public class StreamPipeline {
                 DataStream<InventoryEvent> inventoryStream = env.fromSource(InventorySource.create(),
                                 WatermarkStrategy.noWatermarks(), "Inventory Source").map(new InventoryMapper())
                                 .name("Inventory Event Mapper");
-
                 DataStream<OrderItemEvent> orderItemStream = env
                                 .fromSource(OrderSource.create(), WatermarkStrategy.noWatermarks(), "Order Source")
                                 .flatMap(new OrderItemMapper())

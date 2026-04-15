@@ -14,9 +14,7 @@ public class ValidateStream {
                 return inventoryStream.keyBy(InventoryEvent::getInventoryId)
                                 .connect(orderItemStream
                                                 .filter(r -> !EventStatus.REJECT_ORDER.getValue()
-                                                                .equals(r.getEventType()) &&
-                                                                !EventStatus.COMPLETED_ORDER.getValue()
-                                                                                .equals(r.getEventType()))
+                                                                .equals(r.getEventType()))
                                                 .keyBy(OrderItemEvent::getInventoryId))
                                 .process(new InventoryOrderValidationState());
         }
