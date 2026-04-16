@@ -12,6 +12,19 @@ def completeOrder(conn, request: ResponseModel):
                     where order_id = %s
                     """, (request.order_id,)
                 )
+
+                if cursor.rowcount == 0:
+                    log_event(200,"duplicate-completed-order",event_id,event_payload["order_id"],event_payload)
+                    return {"status":200, "message": "Success", "payload": request.payload}
+                
+                for item in request.payload.order_items:
+                    cursor.execute("""
+                        UPDATE inventory 
+                        SET quantity = quantity - %s
+                        WHERE inventory_id = %s
+                        AND quantity >= %s
+                    """, (item.quantity, item.inventory_id, item.quantity))
+
                 event_metadata = json.dumps({
                             "source": request.source
                         })

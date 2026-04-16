@@ -2,20 +2,24 @@ package com.yourcompany.flink;
 
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.streaming.api.datastream.DataStream;
+import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
 import com.yourcompany.flink.dataMapper.InventoryMapper;
 import com.yourcompany.flink.dataMapper.OrderItemMapper;
 import com.yourcompany.flink.models.InventoryEvent;
+import com.yourcompany.flink.models.InventoryLedgerEvent;
 import com.yourcompany.flink.models.OrderBucketEvent;
 import com.yourcompany.flink.models.OrderItemEvent;
 import com.yourcompany.flink.models.ValidatedEvent;
+import com.yourcompany.flink.sink.InventoryLedgerSink;
 import com.yourcompany.flink.sink.PaymentSink;
 import com.yourcompany.flink.sink.RejectedOrdersSink;
 import com.yourcompany.flink.source.InventorySource;
 import com.yourcompany.flink.source.OrderSource;
 import com.yourcompany.flink.source.PaymentSource;
 import com.yourcompany.flink.source.ShipmentSource;
+import com.yourcompany.flink.stateFunctions.InventoryOrderValidationState;
 import com.yourcompany.flink.statics.OrderValidationStatus;
 import com.yourcompany.flink.task.BucketOrders;
 import com.yourcompany.flink.task.ValidateStream;
@@ -44,8 +48,15 @@ public class StreamPipeline {
                                 .flatMap(new OrderItemMapper())
                                 .name("Shipment Item Event Mapper");
                 DataStream<OrderItemEvent> unifiedStream = orderItemStream.union(paymentStream).union(shipmentStream);
-                DataStream<ValidatedEvent> validatedStream = ValidateStream.validateStream(inventoryStream,
+                SingleOutputStreamOperator<ValidatedEvent> validatedStream = ValidateStream.validateStream(
+                                inventoryStream,
                                 unifiedStream);
+
+                DataStream<InventoryLedgerEvent> ledgerEvents = validatedStream
+                                .getSideOutput(InventoryOrderValidationState.LEDGER_OUTPUT);
+
+                ledgerEvents.map(event -> JsonMapper.toJson(event)).sinkTo(InventoryLedgerSink.create());
+
                 DataStream<OrderBucketEvent> bucketedOrders = BucketOrders.bucketOrder(validatedStream);
 
                 bucketedOrders.filter(event -> OrderValidationStatus.REJECTED == event.getStatus())

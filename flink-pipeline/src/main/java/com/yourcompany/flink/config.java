@@ -8,5 +8,6 @@ public class config {
     public static final String validated_orders_sink_topic = "validated.orders";
     public static final String rejected_orders_sink_topic = "rejected.orders";
     public static final String payments_sink_topic = "request.payments";
+    public static final String inventory_ledger_sink_topic = "ledger.inventory";
     public static final String group_id = "inventory-order-job";
 }
